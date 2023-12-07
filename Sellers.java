@@ -1,26 +1,10 @@
-import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.Logger;
 
 public class Sellers {
     private String uri;
     final private Logger logger;
-
-
-    static public class Seller {
-        int id;
-        String email;
-        String city;
-        String phone;
-        String name;
-        public Seller(int id, String email, String city, String phone, String name) {
-            this.id = id;
-            this.email = email;
-            this.city = city;
-            this.phone = phone;
-            this.name = name;
-        }
-    }
 
     public Sellers(String uri, Logger logger) {
         this.uri = uri;
@@ -29,6 +13,19 @@ public class Sellers {
     }
 
     void dataRead(){
+        //Seller seller;
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String jsonString = "  { \"id\": 2, \"email\": \"user2@example.com\",  \"city\": \"Minsk\",\n" +
+                "    \"phone\": \"+375 29 123-45-67\",   \"name\": \"Elena Ivanova\"  }";
+
+        try {
+            Seller seller = objectMapper.readValue(jsonString, Seller.class);
+            logger.debug(String.valueOf(seller.getId()) + seller.getEmail());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 
