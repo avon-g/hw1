@@ -1,6 +1,7 @@
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 
 /** Read given file into List */
@@ -19,6 +20,7 @@ public class Sales {
         }
     }
     private ArrayList<Sale> salesArray =  new ArrayList<>();                    // data storage
+
 
     public Sales(String uri , Logger logger){
         this.uri = uri;
