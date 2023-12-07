@@ -4,8 +4,11 @@ git add log4j-api-2.12.4.jar
 git add log4j-core-2.12.4.jar
 git add Main.java
 git add Sales.java
+git add Sellers.java
+git add jackson-core-2.16.0.jar
+git add jackson-databind-2.16.0.jar
 git add log4j2.properties
-git commit -m "sales2"
+git commit -m "sallers1"
 git branch -M main
 git remote add origin https://github.com/avon-g/hw1.git
 git push -u origin main
