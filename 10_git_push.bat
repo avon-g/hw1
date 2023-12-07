@@ -10,7 +10,7 @@ git add Main.java
 git add Sales.java
 git add Sellers.java
 
-git commit -m "jackson test1"
+git commit -m "jackson test2"
 git branch -M main
 git remote add origin https://github.com/avon-g/hw1.git
 git push -u origin main
