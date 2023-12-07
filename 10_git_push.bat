@@ -5,7 +5,7 @@ git add log4j-core-2.12.4.jar
 git add Main.java
 git add Sales.java
 git add log4j2.properties
-git commit -m "start2"
+git commit -m "sales1"
 git branch -M main
 git remote add origin https://github.com/avon-g/hw1.git
 git push -u origin main

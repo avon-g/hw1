@@ -1,10 +1,24 @@
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.ArrayList;
 
+/** Read given file into List */
 public class Sales {
     private String uri;                                                         // may vary later
     final private Logger logger;
+
+    static public class Sale {                                                  // data storage type
+        int id;
+        String month ;
+        double amount;
+        public Sale(int id, String month, double amount) {
+            this.id = id;
+            this.month = month;
+            this.amount = amount;
+        }
+    }
+    private ArrayList<Sale> salesArray =  new ArrayList<>();                    // data storage
 
     public Sales(String uri , Logger logger){
         this.uri = uri;
@@ -12,48 +26,66 @@ public class Sales {
         dataRead();
     }
 
-    void dataRead(){
-        logger.info("Sales dataRead start");
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(uri));
-        // reader.readLine()
 
-        int lineNumber = -1;
+    private boolean isNotInt(String s) {                                        // integer detector
+        String digits = s.trim().replaceAll("[^0-9]","");
+        String garb = s.trim().replaceAll("[0-9]","");         // any garbage?
+        return  (digits.isEmpty() || !garb.isEmpty() );                         // true = not integer
+    };
+
+
+    public void dataRead(){
+        logger.info("Sales dataRead start");
+        salesArray.clear();
+
+        int lineNumber = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader(uri))) {
             String line = "";
-
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
+                // explode fields by "|"
                 String[] fields = line.split("\\|" , 6 );
-
                 if (fields.length != 5) {
-                    logger.warn("Line  #" + lineNumber + " is skipped");
+                    logger.warn(uri + " : Line  #" + lineNumber + " is skipped");
                     continue;
                 }
 
-                String dirty_id = fields[1].replaceAll("[^0-9]","");
-                if (dirty_id.isEmpty()) {
-                    logger.warn("Line  #" + lineNumber + " bad ID. Skipped");
+                // ID - integer
+                if (isNotInt(fields[1]) ) {
+                    logger.error(uri + " : Line  #" + lineNumber + " bad ID '" + fields[1] + "'. Skipped");
                     continue;
                 }
+                int id = Integer.parseInt(fields[1].trim());
 
-                int id = Integer.parseInt(dirty_id);
-                logger.debug(id + fields[2] + fields[3]);
-
-/*
-                String ip = params[0];
-                String user = params[1];
-                Date date = readDate(params[2]);
-                Event event = readEvent(params[3]);
-                int eventAdditionalParameter = -1;
-                if (event.equals(Event.SOLVE_TASK) || event.equals(Event.DONE_TASK)) {
-                    eventAdditionalParameter = readAdditionalParameter(params[3]);
+                // amount - float point
+                String dirtyAmount = fields[3].trim().replaceAll("[^0-9.]","");
+                String garbAmount = fields[3].trim().replaceAll("[0-9.]","");
+                if (dirtyAmount.isEmpty() || !garbAmount.isEmpty() ) {
+                    logger.error(uri + " : Line  #" + lineNumber + " bad Amount. '" + fields[3] + "'. Skipped");
+                    continue;
                 }
-                Status status = readStatus(params[4]);
+                double amount = Double.parseDouble(dirtyAmount);
 
-                LogEntity logEntity = new LogEntity(ip, user, date, event, eventAdditionalParameter, status);
-                logEntities.add(logEntity);
-
- */
+                // Month - complex of 2 parts
+                String[] dates = fields[2].trim().split("-" , 3 );
+                if (dates.length != 2) {
+                    logger.error(uri + " : Line  #" + lineNumber + " bad Month field. '" + fields[2] +"'. Skipped");
+                    continue;
+                }
+                // year - uint
+                if (isNotInt(dates[1]) ) {
+                    logger.error(uri + " : Line  #" + lineNumber + " bad Month field. '" + fields[2] +"'. Skipped");
+                    continue;
+                }
+                int year = Integer.parseInt(dates[1].trim());
+                // months names
+                if (!dates[0].trim().matches("JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC") ) {
+                    logger.error(uri + " : Line  #" + lineNumber + " bad Month field. '" + fields[2] +"'. Skipped");
+                    continue;
+                };
+                String monthName = dates[0].trim();
+                //logger.debug(lineNumber + ":\t" + id + "\t" + monthName + "-" + year + "\t" + amount);
+                salesArray.add(new Sale(id, monthName + "-" + String.valueOf(year), amount ) );
             }
         } catch (IOException e) {
                 e.printStackTrace();
