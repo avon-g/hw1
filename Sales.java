@@ -8,7 +8,9 @@ import java.util.ArrayList;
 public class Sales {
     private String uri;                                                         // may vary later
     final private Logger logger;
+    private Sellers sellers;
 
+    /** record subclass */
     static public class Sale {                                                  // data storage type
         int id;
         String month ;
@@ -20,22 +22,26 @@ public class Sales {
         }
     }
     private ArrayList<Sale> salesArray =  new ArrayList<>();                    // data storage
+    private ArrayList<Sale> salesCount =  new ArrayList<>();                    // same object, string is just unused
 
 
-    public Sales(String uri , Logger logger){
+    public Sales(String uri , Logger logger , Sellers sellers){
         this.uri = uri;
         this.logger = logger;
+        this.sellers = sellers;
         dataRead();
     }
 
 
+    /** check String int or not */
     private boolean isNotInt(String s) {                                        // integer detector
-        String digits = s.trim().replaceAll("[^0-9]","");
+        String digits = s.replaceAll("[^0-9]","");
         String garb = s.trim().replaceAll("[0-9]","");         // any garbage?
         return  (digits.isEmpty() || !garb.isEmpty() );                         // true = not integer
     };
 
 
+    /** read and parse data from file */
     public void dataRead(){
         logger.info("Sales dataRead start");
         salesArray.clear();
@@ -54,16 +60,16 @@ public class Sales {
 
                 // ID - integer
                 if (isNotInt(fields[1]) ) {
-                    logger.error(uri + " : Line  #" + lineNumber + " bad ID '" + fields[1] + "'. Skipped");
+                    logger.error(uri + " : Line  #" + lineNumber + " bad ID field'" + fields[1] + "'. Skipped");
                     continue;
                 }
                 int id = Integer.parseInt(fields[1].trim());
 
                 // amount - float point
-                String dirtyAmount = fields[3].trim().replaceAll("[^0-9.]","");
+                String dirtyAmount = fields[3].replaceAll("[^0-9.]","");
                 String garbAmount = fields[3].trim().replaceAll("[0-9.]","");
                 if (dirtyAmount.isEmpty() || !garbAmount.isEmpty() ) {
-                    logger.error(uri + " : Line  #" + lineNumber + " bad Amount. '" + fields[3] + "'. Skipped");
+                    logger.error(uri + " : Line  #" + lineNumber + " bad Amount field. '" + fields[3] + "'. Skipped");
                     continue;
                 }
                 double amount = Double.parseDouble(dirtyAmount);
@@ -89,11 +95,57 @@ public class Sales {
                 //logger.debug(lineNumber + ":\t" + id + "\t" + monthName + "-" + year + "\t" + amount);
                 salesArray.add(new Sale(id, monthName + "-" + String.valueOf(year), amount ) );
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
                 e.printStackTrace();
         }
 
+        // todo: sort arrayList by id here. But I am short in time
+    } // dataRead()
 
+
+    /** make counts */
+    public void makeCounts(){
+        int currentId = -1;                                                     // initial ID
+        int oldId = -1;
+        double sum = 0;
+        salesCount.clear();
+
+        for (Sale sale: salesArray) {                                           // longer, faster for sorted arrayLists
+            int id = sale.id;
+            double amount = sale.amount;
+            if (currentId != id) {
+                if (currentId != -1) {                                          // checkout
+                    salesCount.add(new Sale(currentId, "", sum));
+                    //logger.info(currentId + " " + String.format("%.2f" , sum) );
+                }
+                sum = 0;
+                currentId = id;
+            }
+            sum += amount;
+        }
+    }
+
+    public void makeReport() {
+        SendMail sendMail = new SendMail();
+        for (Sale s : salesCount) {
+            Seller seller = sellers.getSellerById(s.id);
+            String report;
+            if (seller != null) {
+                 report = "id: " + s.id + "\n"
+                 + "name: " + seller.getName() + "\n"
+                 + "city: " + seller.getCity() + "\n"
+                 + "phone: " + seller.getPhone() + "\n"
+                 + "email: " + seller.getEmail() + "\n"
+                 + "Amount: " + s.amount + "\n\n";
+            }
+            else {
+                report = "id: " + s.id + "\n"
+                        + "Amount: " + s.amount + "\n"
+                        + "No other data \n\n";
+            }
+            sendMail.send(report);
+        }
     }
 }
 
