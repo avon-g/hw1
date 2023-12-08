@@ -3,6 +3,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /** Read given file into List */
 public class Sales {
@@ -124,8 +126,20 @@ public class Sales {
             }
             sum += amount;
         }
+
+        Collections.sort(salesCount,
+                new Comparator<Sale>() {
+                    @Override
+                    public int compare(Sale val1, Sale val2) {
+                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                        return val1.amount > val2.amount ? -1 : (val1.amount < val2.amount) ? 1 : 0;
+                }
+        });
+
     }
 
+
+    /** make report and "send by email" */
     public void makeReport() {
         SendMail sendMail = new SendMail();
         for (Sale s : salesCount) {

@@ -12,7 +12,7 @@ git add Seller.java
 git add Sellers.java
 git add SendMail.java 
 
-git commit -m "v1"
+git commit -m "report sort added"
 git branch -M main
 git remote add origin https://github.com/avon-g/hw1.git
 git push -u origin main

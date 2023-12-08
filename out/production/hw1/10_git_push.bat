@@ -8,9 +8,11 @@ git add log4j-core-2.12.4.jar
 git add log4j2.properties
 git add Main.java
 git add Sales.java
+git add Seller.java
 git add Sellers.java
+git add SendMail.java 
 
-git commit -m "jackson test2"
+git commit -m "v1"
 git branch -M main
 git remote add origin https://github.com/avon-g/hw1.git
 git push -u origin main
